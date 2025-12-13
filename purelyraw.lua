@@ -8,20 +8,10 @@ local lp = Players.LocalPlayer
 repeat task.wait() until lp
 
 local CLOUDFLARE_WORKER = "https://roredirect.servruntime.workers.dev/"
-task.wait(2)
-
-local queue
-pcall(function()
-    queue = (syn and syn.queue_on_teleport)
-        or (fluxus and fluxus.queue_on_teleport)
-        or queue_on_teleport
-end)
-
-if type(queue) ~= "function" then
-    queue = nil
-end
+local queue = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
+if type(queue) ~= "function" then queue = nil end
 local protect = (syn and syn.protect_gui) or function(o) return o end
-getgenv()._brainrotReported = getgenv()._brainrotReported or {}
+
 local brainrots = {
 "La Vacca Saturno Saturnita","Bisonte Giuppitere","Blackhole Goat","Jackorilla",
 "Agarrini Ia Palini","Chachechi","Karkerkar Kurkur","Los Tortus","Los Matteos",
@@ -113,28 +103,15 @@ local function hopServer()
             for _, server in ipairs(res.data) do
                 if server.playing < server.maxPlayers and server.id ~= currentJob then
                     print("Teleporting to server:", server.id)
-                    -- try to queue safely
-if queue then
-    local ok, qerr = pcall(function()
-        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/purelyraw.lua'))()")
-    end)
-    if not ok then
-        warn("queue_on_teleport failed, disabling it:", qerr)
-        queue = nil
-    end
-end
-
--- now teleport
-local success, err = pcall(function()
-    TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
-end)
-
-if success then
-    print("Teleport sent successfully. Waiting before next hop...")
-    task.wait(1)
-else
-    warn("Teleport failed:", err)
+                    if queue then
+                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/purelyraw.lua'))()")
                     end
+                    local success, err = pcall(function()
+                        TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
+                    end)
+                    if success then
+                        print("Teleport sent successfully. Waiting before next hop...")
+                        task.wait(1)
                         break
                     else
                         warn("Teleport failed:", err)
@@ -151,12 +128,9 @@ else
 end
 
 local foundList = scanServer()
-
-if #foundList > 0 and not getgenv()._brainrotReported[game.JobId] then
-    getgenv()._brainrotReported[game.JobId] = true
+if #foundList > 0 then
     sendToWorker(foundList)
 else
     print("No brainrots detected, but hopping anyway.")
 end
-
 hopServer()
