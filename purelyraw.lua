@@ -11,7 +11,7 @@ local CLOUDFLARE_WORKER = "https://roredirect.servruntime.workers.dev/"
 local queue = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
 if type(queue) ~= "function" then queue = nil end
 local protect = (syn and syn.protect_gui) or function(o) return o end
-
+getgenv()._brainrotReported = getgenv()._brainrotReported or {}
 local brainrots = {
 "La Vacca Saturno Saturnita","Bisonte Giuppitere","Blackhole Goat","Jackorilla",
 "Agarrini Ia Palini","Chachechi","Karkerkar Kurkur","Los Tortus","Los Matteos",
@@ -128,9 +128,10 @@ local function hopServer()
 end
 
 local foundList = scanServer()
-if #foundList > 0 then
+if #foundList > 0 and not getgenv()._brainrotReported[game.JobId] then
+    getgenv()._brainrotReported[game.JobId] = true
     sendToWorker(foundList)
-else
+end
     print("No brainrots detected, but hopping anyway.")
 end
 hopServer()
