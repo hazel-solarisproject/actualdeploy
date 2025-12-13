@@ -127,9 +127,15 @@ local function hopServer()
     end
 end
 
+getgenv()._brainrotReported = getgenv()._brainrotReported or {}
+
 local foundList = scanServer()
+
 if #foundList > 0 then
-    sendToWorker(foundList)
+    if not getgenv()._brainrotReported[game.JobId] then
+        getgenv()._brainrotReported[game.JobId] = true
+        sendToWorker(foundList)
+    end
 else
     print("No brainrots detected, but hopping anyway.")
 end
