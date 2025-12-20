@@ -498,7 +498,6 @@ local function hopServer()
                             print("teleport succeeded")
                             return 
                         end
-                        task.wait(0.2)
                     end
                     warn("teleport failed or throttled, staying in server")
                 end
@@ -510,7 +509,7 @@ local function hopServer()
             end
         end
 
-        task.wait(0.25)
+        task.wait(0.1)
     end
 end
 
