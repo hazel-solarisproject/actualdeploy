@@ -9,7 +9,72 @@ local lp = Players.LocalPlayer
 repeat task.wait() until lp
 
 local CLOUDFLARE_WORKER = "https://roredirect.servruntime.workers.dev/"
+local HIGH_VALUE_WORKER = "https://your-second-webhook-url-here"
 
+local specialBrainrots = {
+    ["La Grande Combinasion"] = true,
+    ["Los 25"] = true,
+    ["Mariachi Corazoni"] = true,
+    ["Swag Soda"] = true,
+    ["Chimnino"] = true,
+    ["Nuclearo Dinossauro"] = true,
+    ["Los Combinasionas"] = true,
+    ["Chicleteira Noelteira"] = true,
+    ["Fishino Clownino"] = true,
+    ["Tacorita Bicicleta"] = true,
+    ["Las Sis"] = true,
+    ["Los Planitos"] = true,
+    ["Los Spooky Combinasionas"] = true,
+    ["Los Hotspotsitos"] = true,
+    ["Money Money Puggy"] = true,
+    ["Los Mobilis"] = true,
+    ["Los 67"] = true,
+    ["Celularcini Viciosini"] = true,
+    ["Los Candies"] = true,
+    ["La Extinct Grande"] = true,
+    ["Los Bros"] = true,
+    ["La Spooky Grande"] = true,
+    ["Chillin Chili"] = true,
+    ["Chipso and Queso"] = true,
+    ["Mieteteira Bicicleteira"] = true,
+    ["Tralaledon"] = true,
+    ["Gobblino Uniciclino"] = true,
+    ["W or L"] = true,
+    ["Los Puggies"] = true,
+    ["La Jolly Grande"] = true,
+    ["Esok Sekolah"] = true,
+    ["Los Primos"] = true,
+    ["Eviledon"] = true,
+    ["Los Tacoritas"] = true,
+    ["Tang Tang Keletang"] = true,
+    ["La Taco Combinasion"] = true,
+    ["Ketupat Kepat"] = true,
+    ["Tictac Sahur"] = true,
+    ["La Supreme Combinasion"] = true,
+    ["Orcaledon"] = true,
+    ["Swaggy Bros"] = true,
+    ["Ketchuru and Musturu"] = true,
+    ["Lavadorito Spinito"] = true,
+    ["Garama and Madundung"] = true,
+    ["Spaghetti Tualetti"] = true,
+    ["Los Spaghettis"] = true,
+    ["La Ginger Sekolah"] = true,
+    ["Spooky and Pumpky"] = true,
+    ["Fragrama and Chocrama"] = true,
+    ["La Casa Boo"] = true,
+    ["La Secret Combinasion"] = true,
+    ["Reinito Sleighito"] = true,
+    ["Burguro and Fryuro"] = true,
+    ["Cooki and Milki"] = true,
+    ["Capitano Moby"] = true,
+    ["Headless Horseman"] = true,
+    ["Dragon Cannelloni"] = true,
+    ["Strawberry Elephant"] = true,
+    ["Meowl"] = true,
+    ["Chicleteira Noelteira"] = true
+}
+
+local HIGH_INCOME_THRESHOLD = 10000000
 local queue =
     (syn and syn.queue_on_teleport)
     or queue_on_teleport
