@@ -406,9 +406,26 @@ local function scanServer()
             for _, name in ipairs(brainrots) do
                 if obj.Name == name then
                     local income = calculateIncome(obj)
-                    local line = income
-                        and (obj.Name .. " = " .. math.floor(income) .. "/s")
-                        or (obj.Name .. " = Unparsable in the income table")
+                    local traits, mutation = {}, getMutationMultiplier(obj)
+
+                    -- collect all traits
+                    for attr, value in pairs(obj:GetAttributes()) do
+                        if string.sub(attr, 1, 5) == "Trait" then
+                            table.insert(traits, value)
+                        end
+                    end
+                    if obj.PrimaryPart then
+                        for attr, value in pairs(obj.PrimaryPart:GetAttributes()) do
+                            if string.sub(attr, 1, 5) == "Trait" then
+                                table.insert(traits, value)
+                            end
+                        end
+                    end
+
+                    local traitStr = #traits > 0 and table.concat(traits, "+") or "NoTraits"
+                    local mutationStr = mutation > 1 and "Mutation" or "NoMutation"
+
+                    local line = string.format("%s = %d/s [%s][%s]", obj.Name, math.floor(income), traitStr, mutationStr)
                     table.insert(found, line)
                     seen[obj.Name] = true
                 end
@@ -420,7 +437,7 @@ local function scanServer()
 end
 
 local function sendToWorker(lines)
-    local payload = table.concat(lines, "\n")
+    local payload = table.concat(lines, ", ")
 
     local url = string.format(
         "%s?place=%s&job=%s&brainrots=%s",
@@ -446,7 +463,6 @@ local function sendToWorker(lines)
         })
     end
 end
-
 local function hopServer()
     local currentJob = game.JobId
     local cursor = ""
