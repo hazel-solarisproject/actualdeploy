@@ -494,7 +494,7 @@ local function hopServer()
 
 
                     local start = os.clock()
-                    while os.clock() - start < 8 do
+                    while os.clock() - start < 2 do
                         if game.JobId ~= currentJob then
                             print("teleport succeeded")
                             return 
