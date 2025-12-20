@@ -330,6 +330,7 @@ local TraitMultiplier = {
     Fire = 6,
     Meowl = 7,
     Strawberry = 8
+    []=1
 }
 
 
@@ -343,6 +344,7 @@ local MutationMultiplier = {
     ["Yin Yang"] = 7.5,
     Radioactive = 8.5,
     Rainbow = 10
+    []=1
 }
 
 local function getAttr(model, name)
@@ -465,43 +467,45 @@ local function sendToWorker(lines)
 end
 local function hopServer()
     local currentJob = game.JobId
-    local cursor = ""
-    local tried = {}
-
+    local nextCursor = ""
     while true do
         local ok, res = pcall(function()
-            return HttpService:JSONDecode(
-                game:HttpGet(
-                    ("https://games.roblox.com/v1/games/%s/servers/Public?limit=100%s")
-                        :format(game.PlaceId, cursor ~= "" and "&cursor="..cursor or "")
-                )
-            )
+            local url = ("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&limit=100%s")
+                :format(game.PlaceId, nextCursor ~= "" and "&cursor="..nextCursor or "")
+            return HttpService:JSONDecode(game:HttpGet(url))
         end)
-
-        if ok and res and res.data then
-            cursor = res.nextPageCursor or ""
+        if not ok or not res or not res.data then
+            warn("Failed to fetch server page, retrying in 0.5s...")
+            task.wait(0.5)
+        else
+            nextCursor = res.nextPageCursor or ""
             for _, server in ipairs(res.data) do
-                if server.playing < server.maxPlayers and server.id ~= currentJob and not tried[server.id] then
-                    tried[server.id] = true
-
+                if server.playing < server.maxPlayers and server.id ~= currentJob then
+                    print("Teleporting to server:", server.id)
                     if queue then
                         queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/purelyraw.lua'))()")
                     end
-
                     local success, err = pcall(function()
                         TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
                     end)
-
                     if success then
-                        return -- script stops here anyway; player is leaving
+                        print("Teleport sent successfully. Waiting before next hop...")
+                        task.wait(1)
+                        break
+                    else
+                        warn("Teleport failed:", err)
                     end
                 end
             end
+            if nextCursor == "" then
+                nextCursor = ""
+                print("Reached end of server list, restarting from first page...")
+            end
         end
-
         task.wait(0.25)
     end
 end
+
 
 getgenv()._brainrotReported = getgenv()._brainrotReported or {}
 
