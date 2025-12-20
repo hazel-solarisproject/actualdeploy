@@ -466,6 +466,7 @@ end
 local function hopServer()
     local currentJob = game.JobId
     local cursor = ""
+    local tried = {}
 
     while true do
         local ok, res = pcall(function()
@@ -480,13 +481,20 @@ local function hopServer()
         if ok and res and res.data then
             cursor = res.nextPageCursor or ""
             for _, server in ipairs(res.data) do
-                if server.playing < server.maxPlayers and server.id ~= currentJob then
+                if server.playing < server.maxPlayers and server.id ~= currentJob and not tried[server.id] then
+                    tried[server.id] = true
+
                     if queue then
                         queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/purelyraw.lua'))()")
                     end
-                    TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
-                    task.wait(1)
-                    break
+
+                    local success, err = pcall(function()
+                        TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
+                    end)
+
+                    if success then
+                        return -- script stops here anyway; player is leaving
+                    end
                 end
             end
         end
