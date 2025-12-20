@@ -490,10 +490,8 @@ local function hopServer()
 
                     
                     TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
-
-
-                    local start = os.clock()
-                    while os.clock() - start < 2 do
+                    local start = tick()
+                    while tick() - start < 2 do
                         if game.JobId ~= currentJob then
                             print("teleport succeeded")
                             return 
