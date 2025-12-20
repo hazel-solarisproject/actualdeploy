@@ -1,4 +1,4 @@
-
+print("[DEBUG] Script Alive!")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local StarterGui = game:GetService("StarterGui")
