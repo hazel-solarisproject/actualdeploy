@@ -490,6 +490,7 @@ local function hopServer()
 
                     
                     TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
+                    return
 
 
                     local start = os.clock()
