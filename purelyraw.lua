@@ -466,47 +466,40 @@ end
 local function hopServer()
     local currentJob = game.JobId
     local nextCursor = ""
-
     while true do
         local ok, res = pcall(function()
             local url = ("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&limit=100%s")
-                :format(game.PlaceId, nextCursor ~= "" and "&cursor=" .. nextCursor or "")
+                :format(game.PlaceId, nextCursor ~= "" and "&cursor="..nextCursor or "")
             return HttpService:JSONDecode(game:HttpGet(url))
         end)
-
         if not ok or not res or not res.data then
-            warn("server list fetch failed, retrying...")
+            warn("Failed to fetch server page, retrying in 0.5s...")
             task.wait(0.5)
         else
             nextCursor = res.nextPageCursor or ""
-
             for _, server in ipairs(res.data) do
                 if server.playing < server.maxPlayers and server.id ~= currentJob then
-                    print("attempting teleport to:", server.id)
-
+                    print("Teleporting to server:", server.id)
                     if queue then
                         queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/purelyraw.lua'))()")
                     end
-
-                    
-                    TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
-                    local start = tick()
-                    while tick() - start < 3 do
-                        if game.JobId ~= currentJob then
-                            print("teleport succeeded")
-                            return 
-                        end
+                    local success, err = pcall(function()
+                        TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
+                    end)
+                    if success then
+                        print("Teleport sent successfully. Waiting before next hop...")
+                        task.wait(1)
+                        break
+                    else
+                        warn("Teleport failed:", err)
                     end
-                    warn("teleport failed or throttled, staying in server")
                 end
             end
-
             if nextCursor == "" then
-                print("reached end of server list, restarting")
                 nextCursor = ""
+                print("Reached end of server list, restarting from first page...")
             end
         end
-
         task.wait(0.25)
     end
 end
