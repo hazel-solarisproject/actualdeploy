@@ -444,7 +444,7 @@ local mutationName = tostring(mutation):gsub("[\r\n]", " ")
 local line = string.format(
     "%s | %.2fM/s | Traits: %s | Mutation: %s",
     obj.Name,
-    tonumber(income) / 1_000_000,
+    tonumber(income) / 1000000,
     traitStr,
     mutationName
                     )
