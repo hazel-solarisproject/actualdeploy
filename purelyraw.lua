@@ -464,7 +464,8 @@ seen[obj] = true
 end
 
 local function sendToWorker(workerUrl, lines)
-    local payload = table.concat(lines, " || ")
+    local payload = table.concat(lines, "\n")
+payload = string.sub(payload, 1, 1500)
 
     local url = string.format(
     "%s?place=%s&job=%s&brainrots=%s",
