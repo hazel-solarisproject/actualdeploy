@@ -356,7 +356,12 @@ local function getAttr(model, name)
     end
     return nil
 end
-
+local function getMutationName(model)
+    return getAttr(model,"Mutations")
+        or getAttr(model,"Mutation")
+        or getAttr(model,"mutation")
+        or "NoMutation"
+end
 local function sumTraits(model)
     local sum = 0
     local found = false
@@ -426,13 +431,12 @@ collectTraits(obj)
 if obj.PrimaryPart then
     collectTraits(obj.PrimaryPart)
 end
-local function getMutationName(model)
-    return
-        getAttr(model, "Mutations")
-        or getAttr(model, "Mutation")
-        or getAttr(model, "mutation")
-        or "NoMutation"
-                    end
+
+local mutation =
+    getAttr(obj, "Mutations")
+    or getAttr(obj, "Mutation")
+    or getAttr(obj, "mutation")
+    or "NoMutation"
 
 local traitStr = #traits > 0 and table.concat(traits, "+") or "NoTraits"
 
