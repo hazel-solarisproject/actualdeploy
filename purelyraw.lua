@@ -420,9 +420,10 @@ local seenTraits = {}
 
 local function collectTraits(container)
     for attr, value in pairs(container:GetAttributes()) do
-        if string.sub(attr, 1, 5) == "Trait" and not seenTraits[value] then
+        if string.sub(attr,1,5) == "Trait" and not seenTraits[value] then
             seenTraits[value] = true
-            table.insert(traits, value)
+            -- replace any internal newlines with space
+            table.insert(traits, tostring(value):gsub("[\r\n]", " "))
         end
     end
 end
@@ -438,12 +439,12 @@ local mutation =
     or getAttr(obj, "mutation")
     or "NoMutation"
 
-local traitStr = (#traits > 0 and table.concat(traits, "+")) or "NoTraits"
-local mutationName = tostring(mutation or "NoMutation")
+local traitStr = (#traits > 0 and table.concat(traits,"+")) or "NoTraits"
+local mutationName = tostring(mutation):gsub("[\r\n]", " ")
 
 local line = string.format(
     "%s | %.2fM/s | Traits: %s | Mutation: %s",
-    obj.Name,
+    tostring(obj.Name):gsub("[\r\n]", " "),
     income / 1_000_000,
     traitStr,
     mutationName
