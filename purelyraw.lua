@@ -417,19 +417,17 @@ local function scanServer()
                     local traits = {}
 local seenTraits = {}
 
-local function collectTraits(container)
+local function collectTraits(container, traitsTable, seenTable)
     for attr, value in pairs(container:GetAttributes()) do
-        if string.sub(attr,1,5) == "Trait" and not seenTraits[value] then
-            seenTraits[value] = true
-            -- replace any internal newlines with space
-            table.insert(traits, tostring(value):gsub("[\r\n]", " "))
+        if string.sub(attr,1,5) == "Trait" and not seenTable[value] then
+            seenTable[value] = true
+            traitsTable[#traitsTable + 1] = tostring(value):gsub("[\r\n]", " ")
         end
     end
 end
-
-collectTraits(obj)
+collectTraits(obj, traits, seenTraits)
 if obj.PrimaryPart then
-    collectTraits(obj.PrimaryPart)
+    collectTraits(obj.PrimaryPart, traits, seenTraits)
 end
 
 local mutation =
