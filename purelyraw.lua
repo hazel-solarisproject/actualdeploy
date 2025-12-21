@@ -410,26 +410,38 @@ local function scanServer()
             for _, name in ipairs(brainrots) do
                 if obj.Name == name then
                     local income = calculateIncome(obj)
-                    local traits, mutation = {}, getMutationMultiplier(obj)
+                    local traits = {}
+local seenTraits = {}
 
-                    
-                    for attr, value in pairs(obj:GetAttributes()) do
-                        if string.sub(attr, 1, 5) == "Trait" then
-                            table.insert(traits, value)
-                        end
-                    end
-                    if obj.PrimaryPart then
-                        for attr, value in pairs(obj.PrimaryPart:GetAttributes()) do
-                            if string.sub(attr, 1, 5) == "Trait" then
-                                table.insert(traits, value)
-                            end
-                        end
-                    end
+local function collectTraits(container)
+    for attr, value in pairs(container:GetAttributes()) do
+        if string.sub(attr, 1, 5) == "Trait" and not seenTraits[value] then
+            seenTraits[value] = true
+            table.insert(traits, value)
+        end
+    end
+end
 
-                    local traitStr = #traits > 0 and table.concat(traits, "+") or "NoTraits"
-                    local mutationStr = mutation > 1 and "Mutation" or "NoMutation"
+collectTraits(obj)
+if obj.PrimaryPart then
+    collectTraits(obj.PrimaryPart)
+end
 
-                    local line = string.format("%s = %d/s [%s][%s]", obj.Name, math.floor(income), traitStr, mutationStr)
+local mutation =
+    getAttr(obj, "Mutations")
+    or getAttr(obj, "Mutation")
+    or getAttr(obj, "mutation")
+    or "NoMutation"
+
+local traitStr = #traits > 0 and table.concat(traits, "+") or "NoTraits"
+
+local line = string.format(
+    "%s = %d/s [%s][%s]",
+    obj.Name,
+    math.floor(income),
+    traitStr,
+    mutation
+                    )
                     if income < 10_000_000 then
     table.insert(lowFound, line)
 else
