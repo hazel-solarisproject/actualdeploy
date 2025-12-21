@@ -399,7 +399,9 @@ end
 
 local function scanServer()
     local plots = Workspace:FindFirstChild("Plots")
-    if not plots then return {} end
+    if not plots then
+        return {}, {}
+    end
 
     local lowFound, highFound, seen = {}, {}, {}
 
@@ -410,7 +412,7 @@ local function scanServer()
                     local income = calculateIncome(obj)
                     local traits, mutation = {}, getMutationMultiplier(obj)
 
-                    -- collect all traits
+                    
                     for attr, value in pairs(obj:GetAttributes()) do
                         if string.sub(attr, 1, 5) == "Trait" then
                             table.insert(traits, value)
