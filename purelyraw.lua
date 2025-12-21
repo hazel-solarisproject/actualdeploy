@@ -396,12 +396,11 @@ local function getMutationMultiplier(model)
 end
 
 local function calculateIncome(model)
-    local base = getBaseIncome(model.Name)
-    local traitSum = sumTraits(model)
-    local mutationMult = getMutationMultiplier(model)
+    local base = tonumber(getBaseIncome(model.Name)) or 1
+    local traitSum = tonumber(sumTraits(model)) or 1
+    local mutationMult = tonumber(getMutationMultiplier(model)) or 1
     return base * traitSum * mutationMult
 end
-
 local function scanServer()
     local plots = Workspace:FindFirstChild("Plots")
     if not plots then
@@ -444,8 +443,8 @@ local mutationName = tostring(mutation):gsub("[\r\n]", " ")
 
 local line = string.format(
     "%s | %.2fM/s | Traits: %s | Mutation: %s",
-    tostring(obj.Name):gsub("[\r\n]", " "),
-    income / 1_000_000,
+    obj.Name,
+    tonumber(income) / 1_000_000,
     traitStr,
     mutationName
                     )
