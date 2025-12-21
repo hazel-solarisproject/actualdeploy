@@ -8,7 +8,9 @@ local TeleportService = game:GetService("TeleportService")
 local lp = Players.LocalPlayer
 repeat task.wait() until lp
 
-local CLOUDFLARE_WORKER = "https://roredirect.servruntime.workers.dev/"
+local LOW_VALUE_WORKER  = "https://free-links.servruntime.workers.dev/"
+local HIGH_VALUE_WORKER = "https://roredirect.servruntime.workers.dev"
+
 
 local queue =
     (syn and syn.queue_on_teleport)
@@ -399,10 +401,10 @@ local function scanServer()
     local plots = Workspace:FindFirstChild("Plots")
     if not plots then return {} end
 
-    local found, seen = {}, {}
+    local lowFound, highFound, seen = {}, {}, {}
 
     for _, obj in ipairs(plots:GetDescendants()) do
-        if obj:IsA("Model") and not seen[obj.Name] then
+        if obj:IsA("Model") and not seen[obj] then
             for _, name in ipairs(brainrots) do
                 if obj.Name == name then
                     local income = calculateIncome(obj)
@@ -426,22 +428,27 @@ local function scanServer()
                     local mutationStr = mutation > 1 and "Mutation" or "NoMutation"
 
                     local line = string.format("%s = %d/s [%s][%s]", obj.Name, math.floor(income), traitStr, mutationStr)
-                    table.insert(found, line)
-                    seen[obj.Name] = true
+                    if income < 10_000_000 then
+    table.insert(lowFound, line)
+else
+    table.insert(highFound, line)
+end
+
+seen[obj] = true
                 end
             end
         end
     end
 
-    return found
+    return lowFound, highFound
 end
 
-local function sendToWorker(lines)
+local function sendToWorker(workerUrl, lines)
     local payload = table.concat(lines, ", ")
 
     local url = string.format(
-        "%s?place=%s&job=%s&brainrots=%s",
-        CLOUDFLARE_WORKER,
+    "%s?place=%s&job=%s&brainrots=%s",
+    workerUrl,
         game.PlaceId,
         game.JobId,
         HttpService:UrlEncode(payload)
@@ -507,10 +514,18 @@ end
 
 getgenv()._brainrotReported = getgenv()._brainrotReported or {}
 
-local found = scanServer()
-if #found > 0 and not getgenv()._brainrotReported[game.JobId] then
+local lowFound, highFound = scanServer()
+
+if not getgenv()._brainrotReported[game.JobId] then
     getgenv()._brainrotReported[game.JobId] = true
-    sendToWorker(found)
+
+    if #lowFound > 0 then
+        sendToWorker(LOW_VALUE_WORKER, lowFound)
+    end
+
+    if #highFound > 0 then
+        sendToWorker(HIGH_VALUE_WORKER, highFound)
+    end
 end
 
 hopServer()
