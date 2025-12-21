@@ -448,7 +448,7 @@ local line = string.format(
     traitStr,
     mutationName
                     )
-                    if income =< 10_000_000 then
+                    if income <= 10_000_000 then
     table.insert(lowFound, line)
 else
     table.insert(highFound, line)
