@@ -438,16 +438,17 @@ local mutation =
     or getAttr(obj, "mutation")
     or "NoMutation"
 
-local traitStr = #traits > 0 and table.concat(traits, "+") or "NoTraits"
+local traitStr = (#traits > 0 and table.concat(traits, "+")) or "NoTraits"
+local mutationName = tostring(mutation or "NoMutation")
 
 local line = string.format(
-    "%s = %d/s [%s][%s]",
+    "%s | %.2fM/s | Traits: %s | Mutation: %s",
     obj.Name,
-    math.floor(income),
+    income / 1_000_000,
     traitStr,
-    mutation
+    mutationName
                     )
-                    if income < 10_000_000 then
+                    if income =< 10_000_000 then
     table.insert(lowFound, line)
 else
     table.insert(highFound, line)
@@ -463,7 +464,7 @@ seen[obj] = true
 end
 
 local function sendToWorker(workerUrl, lines)
-    local payload = table.concat(lines, ", ")
+    local payload = table.concat(lines, " || ")
 
     local url = string.format(
     "%s?place=%s&job=%s&brainrots=%s",
