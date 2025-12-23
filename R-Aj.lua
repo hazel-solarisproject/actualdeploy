@@ -21,6 +21,7 @@ local queue =
     or queue_on_teleport
     or (fluxus and fluxus.queue_on_teleport)
 local list1 = {
+    "Noobini Pizzanini",
     "Bisonte Giuppitere",
     "Los Matteos",
     "La Vacca Saturno Saturnita",
