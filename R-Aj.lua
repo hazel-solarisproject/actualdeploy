@@ -251,6 +251,7 @@ local function hop()
                     if queue then
                         queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/R-Aj.lua'))()")
                     end
+                    print("trying server", s.id, s.playing, "/", s.maxPlayers)
                     TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, lp)
                     task.wait(1)
                 end
@@ -264,8 +265,10 @@ end
 local found = scan()
 if #found > 0 then
     if not report(found) then
+        print("hop(): searching for servers")
         hop()
     end
 else
+    print("hop(): searching for servers")
     hop()
 end
