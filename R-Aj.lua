@@ -1,4 +1,3 @@
-
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local HttpService = game:GetService("HttpService")
@@ -236,24 +235,6 @@ local function report(found)
     return true
 end
 
-HttpService:UrlEncode(table.concat(relevant, ", ")),
-        #Players:GetPlayers()
-    )
-
-    local ok, res = pcall(function()
-        return game:HttpGet(url)
-    end)
-    if not ok then return false end
-
-    local data = HttpService:JSONDecode(res)
-    if data.allowed == false then
-        return false
-    end
-
-    print("claimed:", data.link)
-    return true
-end
-
 local function hop()
     local cursor = ""
     while true do
@@ -268,7 +249,7 @@ local function hop()
             for _, s in ipairs(res.data) do
                 if s.playing < s.maxPlayers and s.id ~= game.JobId then
                     if queue then
-                        queue("loadstring(Game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/R-Aj.lua'))()")
+                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/R-Aj.lua'))()")
                     end
                     TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, lp)
                     task.wait(1)
