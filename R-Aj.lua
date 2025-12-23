@@ -14,7 +14,7 @@ TeleportService.TeleportInitFailed:Connect(function(player, result, err)
 end)
 repeat task.wait() until lp
 print("script started")
-local WORKER_BASE = "https://redirect.servruntime.workers.dev/"
+local WORKER_BASE = "https://redirect.servruntime.workers.dev"
 local MAX_PLAYERS = 8
 local queue =
     (syn and syn.queue_on_teleport)
