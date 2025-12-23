@@ -21,7 +21,6 @@ local queue =
     or queue_on_teleport
     or (fluxus and fluxus.queue_on_teleport)
 local list1 = {
-    "Noobini Pizzanini",
     "Bisonte Giuppitere",
     "Los Matteos",
     "La Vacca Saturno Saturnita",
@@ -77,7 +76,6 @@ local list1 = {
     "To to to Sahur",
     "Pot Hotspot",
     "Pirulitoita Bicicleteira",
-    "25",
     "Horegini Boom",
     "Naughty Naughty",
     "Pot Pumpkin",
