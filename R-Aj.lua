@@ -268,7 +268,7 @@ local function hop()
             for _, s in ipairs(res.data) do
                 if s.playing < s.maxPlayers and s.id ~= game.JobId then
                     if queue then
-                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/R-Aj.lua'))()")
+                        queue("loadstring(Game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/R-Aj.lua'))()")
                     end
                     TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, lp)
                     task.wait(1)
