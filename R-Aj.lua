@@ -210,13 +210,31 @@ local function report(found)
     local sev = classify(found)
     if not sev then return false end
 
+    local relevant = filterBySeverity(found, sev)
+
     local url = string.format(
         "%s/%s?place=%s&job=%s&brainrots=%s&playing=%d",
         WORKER_BASE,
         sev,
         game.PlaceId,
         game.JobId,
-        local relevant = filterBySeverity(found, sev)
+        HttpService:UrlEncode(table.concat(relevant, ", ")),
+        #Players:GetPlayers()
+    )
+
+    local ok, res = pcall(function()
+        return game:HttpGet(url)
+    end)
+    if not ok then return false end
+
+    local data = HttpService:JSONDecode(res)
+    if data.allowed == false then
+        return false
+    end
+
+    print("claimed:", data.link)
+    return true
+end
 
 HttpService:UrlEncode(table.concat(relevant, ", ")),
         #Players:GetPlayers()
