@@ -18,8 +18,8 @@ local WORKER_BASE = "https://redirect.servruntime.workers.dev/"
 local MAX_PLAYERS = 8
 local queue =
     (syn and syn.queue_on_teleport)
+    or queue_on_teleport
     or (fluxus and fluxus.queue_on_teleport)
-    or function() end
 local list1 = {
     "Bisonte Giuppitere",
     "Los Matteos",
@@ -261,7 +261,7 @@ local function hopServer()
                 if server.playing < server.maxPlayers and server.id ~= currentJob then
                     print("Teleporting to server:", server.id)
                     if queue then
-                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/purelyraw.lua'))()")
+                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/R-Aj.lua'))()")
                     end
                     local success, err = pcall(function()
                         TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
