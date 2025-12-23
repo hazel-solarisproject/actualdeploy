@@ -243,42 +243,45 @@ local function report(found)
     return true
 end
 
-local function hop()
-    local cursor = ""
-
+local function hopServer()
+    local currentJob = game.JobId
+    local nextCursor = ""
     while true do
-        if teleporting then
-            task.wait(1)
-            continue
-        end
-
-        local url = ("https://games.roblox.com/v1/games/%d/servers/Public?limit=100%s")
-            :format(game.PlaceId, cursor ~= "" and "&cursor=" .. cursor or "")
-
         local ok, res = pcall(function()
+            local url = ("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&limit=100%s")
+                :format(game.PlaceId, nextCursor ~= "" and "&cursor="..nextCursor or "")
             return HttpService:JSONDecode(game:HttpGet(url))
         end)
-
-        if ok and res and res.data then
-            for _, s in ipairs(res.data) do
-                if s.playing < s.maxPlayers and s.id ~= game.JobId then
-                    teleporting = true
-                    print("attempting server", s.id, s.playing, "/", s.maxPlayers)
-                    TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, Players.LocalPlayer)
-                    return
+        if not ok or not res or not res.data then
+            warn("Failed to fetch server page, retrying in 0.5s...")
+            task.wait(0.5)
+        else
+            nextCursor = res.nextPageCursor or ""
+            for _, server in ipairs(res.data) do
+                if server.playing < server.maxPlayers and server.id ~= currentJob then
+                    print("Teleporting to server:", server.id)
+                    if queue then
+                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/purelyraw.lua'))()")
+                    end
+                    local success, err = pcall(function()
+                        TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
+                    end)
+                    if success then
+                        print("Teleport sent successfully. Waiting before next hop...")
+                        task.wait(1)
+                        break
+                    else
+                        warn("Teleport failed:", err)
+                    end
                 end
             end
-            cursor = res.nextPageCursor or ""
+            if nextCursor == "" then
+                nextCursor = ""
+                print("Reached end of server list, restarting from first page...")
+            end
         end
-
-        task.wait(1)
+        task.wait(0.25)
     end
 end
-task.spawn(function()
-    while true do
-        if not teleporting then
-            hop()
-        end
-        task.wait(2)
-    end
-end)
+
+hopServer()
