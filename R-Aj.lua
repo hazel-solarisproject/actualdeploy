@@ -5,13 +5,13 @@ local TeleportService = game:GetService("TeleportService")
 
 local lp = Players.LocalPlayer
 repeat task.wait() until lp
-
+print("script started")
 local WORKER_BASE = "https://redirect.servruntime.workers.dev/"
 local MAX_PLAYERS = 8
 local queue =
     (syn and syn.queue_on_teleport)
-    or queue_on_teleport
     or (fluxus and fluxus.queue_on_teleport)
+    or function() end
 local list1 = {
     "Bisonte Giuppitere",
     "Los Matteos",
