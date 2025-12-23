@@ -5,6 +5,13 @@ local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
 
 local lp = Players.LocalPlayer
+local teleporting = false
+
+TeleportService.TeleportInitFailed:Connect(function(player, result, err)
+    if player ~= Players.LocalPlayer then return end
+    warn("teleport failed:", result, err)
+    teleporting = false
+end)
 repeat task.wait() until lp
 print("script started")
 local WORKER_BASE = "https://redirect.servruntime.workers.dev/"
@@ -238,7 +245,13 @@ end
 
 local function hop()
     local cursor = ""
+
     while true do
+        if teleporting then
+            task.wait(1)
+            continue
+        end
+
         local url = ("https://games.roblox.com/v1/games/%d/servers/Public?limit=100%s")
             :format(game.PlaceId, cursor ~= "" and "&cursor=" .. cursor or "")
 
@@ -249,17 +262,16 @@ local function hop()
         if ok and res and res.data then
             for _, s in ipairs(res.data) do
                 if s.playing < s.maxPlayers and s.id ~= game.JobId then
-                    if queue then
-                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/R-Aj.lua'))()")
-                    end
-                    print("trying server", s.id, s.playing, "/", s.maxPlayers)
-                    TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, lp)
-                    task.wait(1)
+                    teleporting = true
+                    print("attempting server", s.id, s.playing, "/", s.maxPlayers)
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, Players.LocalPlayer)
+                    return
                 end
             end
             cursor = res.nextPageCursor or ""
         end
-        task.wait(0.3)
+
+        task.wait(1)
     end
 end
 
@@ -273,3 +285,11 @@ else
     print("hop(): searching for servers")
     task.spawn(hop)
 end
+task.spawn(function()
+    while true do
+        if not teleporting then
+            hop()
+        end
+        task.wait(2)
+    end
+end)
