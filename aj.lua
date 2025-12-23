@@ -104,7 +104,7 @@ local function hopServer()
                 if server.playing < server.maxPlayers and server.id ~= currentJob then
                     print("Teleporting to server:", server.id)
                     if queue then
-                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/purelyraw.lua'))()")
+                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/aj.lua'))()")
                     end
                     local success, err = pcall(function()
                         TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
