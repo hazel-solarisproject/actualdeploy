@@ -229,6 +229,7 @@ local function report(found)
         HttpService:UrlEncode(table.concat(relevant, ", ")),
         #Players:GetPlayers()
     )
+    
 
     local ok, res = pcall(function()
         return game:HttpGet(url)
@@ -243,7 +244,10 @@ local function report(found)
     print("claimed:", data.link)
     return true
 end
-
+local found = scan()
+if #found > 0 then
+    report(found)
+end
 local function hopServer()
     local currentJob = game.JobId
     local nextCursor = ""
