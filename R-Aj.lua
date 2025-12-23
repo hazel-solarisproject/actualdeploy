@@ -274,17 +274,6 @@ local function hop()
         task.wait(1)
     end
 end
-
-local found = scan()
-if #found > 0 then
-    if not report(found) then
-        print("hop(): searching for servers")
-        task.spawn(hop)
-    end
-else
-    print("hop(): searching for servers")
-    task.spawn(hop)
-end
 task.spawn(function()
     while true do
         if not teleporting then
