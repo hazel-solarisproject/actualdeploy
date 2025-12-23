@@ -192,7 +192,20 @@ local function classify(found)
     end
     return nil
 end
+local function filterBySeverity(found, sev)
+    local out = {}
+    local src =
+        sev == "high" and list3
+        or sev == "med" and list2
+        or list1
 
+    for _, v in ipairs(found) do
+        if inList(v, src) then
+            table.insert(out, v)
+        end
+    end
+    return out
+end
 local function report(found)
     local sev = classify(found)
     if not sev then return false end
@@ -203,7 +216,9 @@ local function report(found)
         sev,
         game.PlaceId,
         game.JobId,
-        HttpService:UrlEncode(table.concat(found, ", ")),
+        local relevant = filterBySeverity(found, sev)
+
+HttpService:UrlEncode(table.concat(relevant, ", ")),
         #Players:GetPlayers()
     )
 
