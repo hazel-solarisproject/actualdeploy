@@ -242,20 +242,31 @@ local function report(found)
     print("claimed:", data.link)
     return true
 end
-local found = scan()
-if #found > 0 then
-    report(found)
-    return
+local alreadyClaimed = false  -- track if embed has already been sent
+
+local function tryClaim()
+    local found = scan()
+    if #found > 0 and not alreadyClaimed then
+        local success = report(found)
+        if success then
+            alreadyClaimed = true  -- mark that embed has been sent
+            print("Plot claimed, embed sent once.")
+        end
+    end
 end
+
 local function hopServer()
     local currentJob = game.JobId
     local nextCursor = ""
     while true do
+        tryClaim()  -- check/claim once per server loop, but only one embed
+
         local ok, res = pcall(function()
             local url = ("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&limit=100%s")
                 :format(game.PlaceId, nextCursor ~= "" and "&cursor="..nextCursor or "")
             return HttpService:JSONDecode(game:HttpGet(url))
         end)
+
         if not ok or not res or not res.data then
             warn("Failed to fetch server page, retrying in 0.5s...")
             task.wait(0.5)
@@ -284,6 +295,7 @@ local function hopServer()
                 print("Reached end of server list, restarting from first page...")
             end
         end
+
         task.wait(0.25)
     end
 end
