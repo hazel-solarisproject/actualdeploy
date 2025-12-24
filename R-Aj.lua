@@ -245,6 +245,7 @@ end
 local found = scan()
 if #found > 0 then
     report(found)
+    return
 end
 local function hopServer()
     local currentJob = game.JobId
