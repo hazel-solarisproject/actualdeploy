@@ -278,7 +278,7 @@ local function hopServer()
         else
             nextCursor = res.nextPageCursor or ""
             for _, server in ipairs(res.data) do
-                if server.playing < server.maxPlayers and server.id ~= currentJob then
+                if server.playing < 8 and server.id ~= currentJob then
                     print("Teleporting to server:", server.id)
                     if queue then
                         queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/R-Aj.lua'))()")
