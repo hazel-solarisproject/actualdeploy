@@ -267,7 +267,7 @@ local function hopServer()
         tryClaim()  -- check/claim once per server loop, but only one embed
 
         local ok, res = pcall(function()
-            local url = ("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&limit=100%s")
+            local url = ("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&excludeFullGames=True&limit=100%s")
                 :format(game.PlaceId, nextCursor ~= "" and "&cursor="..nextCursor or "")
             return HttpService:JSONDecode(game:HttpGet(url))
         end)
