@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
-
+local scannedThisServer = false
 local lp = Players.LocalPlayer
 local teleporting = false
 
@@ -242,16 +242,21 @@ local function report(found)
     print("claimed:", data.link)
     return true
 end
-local alreadyClaimed = false  -- track if embed has already been sent
+local alreadyClaimed = false
 
 local function tryClaim()
+    if scannedThisServer then return end
+    scannedThisServer = true
+
     local found = scan()
-    if #found > 0 and not alreadyClaimed then
-        local success = report(found)
-        if success then
-            alreadyClaimed = true  -- mark that embed has been sent
-            print("Plot claimed, embed sent once.")
-        end
+    if #found == 0 then
+        print("scanned server, nothing found.")
+        return
+    end
+
+    local success = report(found)
+    if success then
+        print("embed sent once for this server.")
     end
 end
 
