@@ -201,9 +201,12 @@ local function report(found)
         HttpService:UrlEncode(table.concat(payload, "\n"))
     )
 
-    return pcall(function()
-        game:HttpGet(url)
-    end)
+    local ok, err = pcall(function()
+    return game:HttpGet(url)
+end)
+
+print("cf send:", ok, err)
+print("url:", url)
 end
 local function tryClaim()
     if scannedThisServer then return end
@@ -250,4 +253,3 @@ local function hopServer()
     end
 end
 
-hopServer()
