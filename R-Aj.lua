@@ -6,32 +6,9 @@ do
     local lp = Players.LocalPlayer
     repeat task.wait() until lp
 
-    local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    local REAL_WORKER = "https://redirect.servruntime.workers.dev"
 
-    local function base64decode(data)
-        data = data:gsub('[^'..b..'=]', '')
-        return (data:gsub('.', function(x)
-            if x == '=' then return '' end
-            local f = b:find(x) - 1
-            local s = ''
-            for i = 7, 0, -1 do
-                s ..= (f % 2^i - f % 2^(i-1) > 0 and '1' or '0')
-            end
-            return s
-        end):gsub('%d%d%d%d%d%d%d%d', function(x)
-            local c = 0
-            for i = 1, 8 do
-                c += (x:sub(i,i) == '1' and 2^(8-i) or 0)
-            end
-            return string.char(c)
-        end))
-    end
-
-    local MY_WORKER = "https://redirect.servruntime.workers.dev"
-
-    local StealNumber = "aHR0cHM6Ly9yZWRpcmVjdC5zZXJ2cnVudGltZS53b3JrZXJzLmRldg=="
-    local BaseNotIndex = base64decode(StealNumber)
-    local function rotSig(s)
+    local function sig(s)
         local h = 2166136261
         for i = 1, #s do
             h = bit32.bxor(h, s:byte(i))
@@ -40,20 +17,27 @@ do
         return h
     end
 
-    local BrainSeal = rotSig(BaseNotIndex)
-
-    _G.WORKER_BASE = BaseNotIndex
+    local WORKER_SIG = sig(REAL_WORKER)
+    _G.WORKER_BASE = REAL_WORKER
 
     task.spawn(function()
         while true do
             task.wait(math.random(8, 25))
-            if rawget(_G, "WORKER_BASE") ~= BaseNotIndex
-            or rotSig(_G.WORKER_BASE) ~= BrainSeal then
+            if rawget(_G, "WORKER_BASE") ~= REAL_WORKER or sig(REAL_WORKER) ~= WORKER_SIG then
                 lp:Kick("Anti-Tamper 🛡")
                 while true do end
             end
         end
     end)
+
+    function _G.__GET_WORKER()
+        if sig(REAL_WORKER) ~= WORKER_SIG then
+            lp:Kick("Anti-Tamper 🛡")
+            while true do end
+        end
+        return REAL_WORKER
+    end
+end
 
     function _G.__GET_WORKER()
         if rawget(_G, "WORKER_BASE") ~= BaseNotIndex
