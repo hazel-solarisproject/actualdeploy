@@ -117,7 +117,6 @@ local function scan()
     local found, seen = {}, {}
 
     for _, inst in ipairs(plots:GetDescendants()) do
-    print("seen:", inst:GetFullName())
         local animal = Animals[inst.Name]
         if not animal then continue end
         if not ALLOWED_RARITY[animal.Rarity] then continue end
