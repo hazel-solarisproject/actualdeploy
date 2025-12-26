@@ -10,7 +10,8 @@ do
     local function sig(s)
         local h = 2166136261
         for i = 1, #s do
-            h = (h ~ s:byte(i)) * 16777619 % 2^32
+            h = bit32.bxor(h, s:byte(i))
+            h = (h * 16777619) % 2^32
         end
         return h
     end
