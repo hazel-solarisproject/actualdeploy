@@ -116,7 +116,7 @@ local function splitCSV(str)
     return t
 end
 
-local function getTraitMultiplier(attr)
+local function getTraitsMultiplier(attr)
     local mult = 1
     for _, name in ipairs(splitCSV(attr)) do
         local data = Traits[name]
@@ -165,7 +165,7 @@ local function report(found)
     local maxGeneration = "?"
 
     for _, inst in ipairs(found) do
-        local traitAttr = inst:GetAttribute("Traits")
+        local traitsAttr = inst:GetAttribute("Traits")
         local mutationAttr = inst:GetAttribute("Mutation")
 
         local traitsMult = getTraitsMultiplier(traitsAttr)
