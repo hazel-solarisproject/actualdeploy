@@ -38,15 +38,6 @@ do
         return REAL_WORKER
     end
 end
-    function _G.__GET_WORKER()
-        if rawget(_G, "WORKER_BASE") ~= BaseNotIndex
-        or rotSig(_G.WORKER_BASE) ~= BrainSeal then
-            lp:Kick("Anti-Tamper 🛡")
-            while true do end
-        end
-        return _G.WORKER_BASE
-    end
-end
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
