@@ -42,7 +42,7 @@ do
         return _G.WORKER_BASE
     end
 end
-
+local MY_WORKER = "https://redirect.servruntime.workers.dev"
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local HttpService = game:GetService("HttpService")
