@@ -141,7 +141,7 @@ local BaseIncome = {
     ["Swag Soda"] = 10000000,
     ["Chimnino"] = 10000000,
     ["Nuclearo Dinossauro"] = 15000000,
-    ["Los Combinasionas"] = 63700000,
+    ["Los Combinasionas"] = 15000000,
     ["Chicleteira Noelteira"] = 15000000,
     ["Fishino Clownino"] = 10000000,
     ["Tacorita Bicicleta"] = 16500000,
@@ -262,7 +262,7 @@ local function report(found)
     if #found == 0 then return false end
 
     local payload = {}
-    local totalValue = 0
+    local maxValue = 0
 
     for _, inst in ipairs(found) do
         local traitAttr = inst:GetAttribute("Trait")
@@ -273,23 +273,26 @@ local function report(found)
             * getTraitSum(traitAttr)
             * getMutationMult(mutationAttr)
 
-        totalValue += value
+        if value > maxValue then
+            maxValue = value
+        end
 
-        table.insert(payload,
-            string.format(
-                "%s | %s | %s | %s",
-                inst.Name,
-                traitAttr or "None",
-                mutationAttr or "None",
-                formatValue(value)
-            )
-        )
-    end
+        if value == maxValue then
+            payload = {
+                string.format(
+                    "%s | %s | %s | %s",
+                    inst.Name,
+                    traitAttr or "None",
+                    mutationAttr or "None",
+                    formatValue(value)
+                )
+            }
+        end
 
     local route
-    if totalValue < 10_000_000 then
+    if maxValue < 10_000_000 then
         route = "/low"
-    elseif totalValue < 30_000_000 then
+    elseif maxValue < 30_000_000 then
         route = "/med"
     else
         route = "/high"
@@ -298,13 +301,13 @@ local function report(found)
     local WORKER_BASE = _G.__GET_WORKER()
 
     local url = string.format(
-        "%s%s?place=%s&job=%s&playing=%d&total=%s&brainrots=%s",
+        "%s%s?place=%s&job=%s&playing=%d&max=%s&brainrots=%s",
         WORKER_BASE,
         route,
         game.PlaceId,
         game.JobId,
         #Players:GetPlayers(),
-        formatValue(totalValue),
+        formatValue(maxValue),
         HttpService:UrlEncode(table.concat(payload, "\n"))
     )
 
