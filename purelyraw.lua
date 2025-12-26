@@ -1,37 +1,46 @@
 print("alive")
+print("=====================🛡=====================")
 do
     local Players = game:GetService("Players")
     local lp = Players.LocalPlayer
+    repeat task.wait() until lp
 
-    local function k()
-        return (#lp.Name * 17)
-             + (game.PlaceId % 97)
-             + (#game.JobId)
-    end
+    local REAL_WORKER = "https://redirect.servruntime.workers.dev"
 
-    local function x(b, key)
-        local out = {}
-        for i = 1, #b do
-            out[i] = string.char(bit32.bxor(b[i], (key + i) % 255))
+    local function sig(s)
+        local h = 2166136261
+        for i = 1, #s do
+            h = (h ~ s:byte(i)) * 16777619 % 2^32
         end
-        return table.concat(out)
-    end
-    local blob = {
-        25, 57, 46, 54, 41, 41, 123, 110, 108, 105, 96, 110,
-        123, 110, 123, 125, 96, 110, 123, 110, 108, 96,
-        123, 96, 110, 105, 96, 96, 121, 122, 123, 123,
-        110, 96, 111, 110, 121, 110
-    }
-
-    local expected = x(blob, k())
-    local injected = rawget(_G, "WORKER_BASE")
-    if injected and injected ~= expected then
-        lp:Kick("Anti-Tamper 🛡")
-        while true do end
+        return h
     end
 
-    _G.WORKER_BASE = expected
+    local WORKER_SIG = sig(REAL_WORKER)
+    _G.WORKER_BASE = REAL_WORKER
+
+    task.spawn(function()
+        while true do
+            task.wait(math.random(8, 25))
+            if rawget(_G, "WORKER_BASE") ~= REAL_WORKER then
+                lp:Kick("Anti-Tamper 🛡")
+                while true do end
+            end
+            if sig(REAL_WORKER) ~= WORKER_SIG then
+                lp:Kick("Anti-Tamper 🛡")
+                while true do end
+            end
+        end
+    end)
+
+    function _G.__GET_WORKER()
+        if sig(REAL_WORKER) ~= WORKER_SIG then
+            lp:Kick("Anti-Tamper 🛡")
+            while true do end
+        end
+        return REAL_WORKER
+    end
 end
+
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local HttpService = game:GetService("HttpService")
@@ -41,7 +50,6 @@ local lp = Players.LocalPlayer
 repeat task.wait() until lp
 print("script started")
 
-local WORKER_BASE = _G.WORKER_BASE
 local MAX_PLAYERS = 8
 
 local queue =
@@ -50,12 +58,6 @@ local queue =
     or (fluxus and fluxus.queue_on_teleport)
 
 local scannedThisServer = false
-local teleporting = false
-
-TeleportService.TeleportInitFailed:Connect(function(player)
-    if player ~= lp then return end
-    teleporting = false
-end)
 
 local BaseIncome = {
     ["Bisonte Giuppitere"] = 300000,
@@ -225,6 +227,7 @@ end
 local function getTraitSum(attr)
     if not attr then return 1 end
     local sum = 0
+
     if typeof(attr) == "string" then
         sum = TraitMultiplier[attr] or 1
     elseif typeof(attr) == "table" then
@@ -232,6 +235,7 @@ local function getTraitSum(attr)
             sum += TraitMultiplier[t] or 1
         end
     end
+
     return sum > 0 and sum or 1
 end
 
@@ -254,55 +258,103 @@ local function scan()
 end
 
 local function report(found)
-    if #found == 0 then return end
+    if #found == 0 then return false end
 
     local payload = {}
+    local totalValue = 0
 
     for _, inst in ipairs(found) do
         local traitAttr = inst:GetAttribute("Trait")
         local mutationAttr = inst:GetAttribute("Mutation")
-
-        local traitText = "None"
-        if typeof(traitAttr) == "string" then
-            traitText = traitAttr
-        elseif typeof(traitAttr) == "table" then
-            traitText = table.concat(traitAttr, ", ")
-        end
-
-        local mutationText = mutationAttr or "None"
 
         local value =
             BaseIncome[inst.Name]
             * getTraitSum(traitAttr)
             * getMutationMult(mutationAttr)
 
-        table.insert(
-            payload,
+        totalValue += value
+
+        table.insert(payload,
             string.format(
                 "%s | %s | %s | %s",
                 inst.Name,
-                traitText,
-                mutationText,
+                traitAttr or "None",
+                mutationAttr or "None",
                 formatValue(value)
             )
         )
     end
 
+    local route
+    if totalValue < 10_000_000 then
+        route = "/low"
+    elseif totalValue < 30_000_000 then
+        route = "/med"
+    else
+        route = "/high"
+    end
+
+    local WORKER_BASE = _G.__GET_WORKER()
+
     local url = string.format(
-        "%s/report?place=%s&job=%s&playing=%d&brainrots=%s",
+        "%s%s?place=%s&job=%s&playing=%d&total=%s&brainrots=%s",
         WORKER_BASE,
+        route,
         game.PlaceId,
         game.JobId,
         #Players:GetPlayers(),
+        formatValue(totalValue),
         HttpService:UrlEncode(table.concat(payload, "\n"))
     )
 
-    pcall(function()
+    return pcall(function()
         game:HttpGet(url)
     end)
 end
 
-if not scannedThisServer then
+local function tryClaim()
+    if scannedThisServer then return end
     scannedThisServer = true
     report(scan())
 end
+
+local function hopServer()
+    local currentJob = game.JobId
+    local nextCursor = ""
+
+    while true do
+        tryClaim()
+
+        local ok, res = pcall(function()
+            local url =
+                ("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&excludeFullGames=True&limit=100%s")
+                :format(game.PlaceId, nextCursor ~= "" and "&cursor=" .. nextCursor or "")
+            return HttpService:JSONDecode(game:HttpGet(url))
+        end)
+
+        if ok and res and res.data then
+            nextCursor = res.nextPageCursor or ""
+
+            for _, server in ipairs(res.data) do
+                if server.id
+                and (tonumber(server.playing) or 0) < MAX_PLAYERS
+                and server.id ~= currentJob then
+
+                    if queue then
+                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/R-Aj.lua'))()")
+                    end
+
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
+                    task.wait(1)
+                    break
+                end
+            end
+        else
+            task.wait(0.5)
+        end
+
+        task.wait(0.25)
+    end
+end
+
+hopServer()
