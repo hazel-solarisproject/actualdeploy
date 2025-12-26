@@ -244,3 +244,4 @@ local function hopServer()
         task.wait(0.25)
     end
 end
+hopServer()
