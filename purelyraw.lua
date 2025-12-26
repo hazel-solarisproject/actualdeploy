@@ -341,7 +341,7 @@ local function hopServer()
                 and server.id ~= currentJob then
 
                     if queue then
-                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/R-Aj.lua'))()")
+                        queue("loadstring(game:HttpGet('https://raw.githubusercontent.com/hazel-solarisproject/actualdeploy/main/purelyraw.lua'))()")
                     end
 
                     TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, lp)
