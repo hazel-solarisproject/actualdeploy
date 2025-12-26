@@ -3,12 +3,14 @@ print("=====================🛡=====================")
 
 do
     local Players = game:GetService("Players")
+    local HttpService = game:GetService("HttpService")
     local lp = Players.LocalPlayer
     repeat task.wait() until lp
 
-    local REAL_WORKER = "https://redirect.servruntime.workers.dev"
+    local StealNumber = "aHR0cHM6Ly9yZWRpcmVjdC5zZXJ2cnVudGltZS53b3JrZXJzLmRldg=="
+    local BaseNotIndex = HttpService:Base64Decode(StealNumber)
 
-    local function sig(s)
+    local function rotSig(s)
         local h = 2166136261
         for i = 1, #s do
             h = bit32.bxor(h, s:byte(i))
@@ -17,13 +19,14 @@ do
         return h
     end
 
-    local WORKER_SIG = sig(REAL_WORKER)
-    _G.WORKER_BASE = REAL_WORKER
+    local BrainSeal = rotSig(BaseNotIndex)
+    _G.WORKER_BASE = BaseNotIndex
 
     task.spawn(function()
         while true do
             task.wait(math.random(8, 25))
-            if rawget(_G, "WORKER_BASE") ~= REAL_WORKER or sig(REAL_WORKER) ~= WORKER_SIG then
+            if rawget(_G, "WORKER_BASE") ~= BaseNotIndex
+            or rotSig(_G.WORKER_BASE) ~= BrainSeal then
                 lp:Kick("Anti-Tamper 🛡")
                 while true do end
             end
@@ -31,11 +34,12 @@ do
     end)
 
     function _G.__GET_WORKER()
-        if sig(REAL_WORKER) ~= WORKER_SIG then
+        if rawget(_G, "WORKER_BASE") ~= BaseNotIndex
+        or rotSig(_G.WORKER_BASE) ~= BrainSeal then
             lp:Kick("Anti-Tamper 🛡")
             while true do end
         end
-        return REAL_WORKER
+        return _G.WORKER_BASE
     end
 end
 
