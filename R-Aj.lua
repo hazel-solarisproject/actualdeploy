@@ -165,14 +165,14 @@ local function report(found)
     local maxGeneration = "?"
 
     for _, inst in ipairs(found) do
-        local traitAttr = inst:GetAttribute("Trait")
+        local traitAttr = inst:GetAttribute("Traits")
         local mutationAttr = inst:GetAttribute("Mutation")
 
-        local traitMult = getTraitMultiplier(traitAttr)
+        local traitsMult = getTraitsMultiplier(traitsAttr)
         local mutationMult = getMutationMultiplier(mutationAttr)
 
         local baseGen = Animals[inst.Name] and Animals[inst.Name].Generation or 0
-        local value = baseGen * traitMult * mutationMult
+        local value = baseGen * traitsMult * mutationMult
 
         if value > maxValue then
             maxValue = value
@@ -183,7 +183,7 @@ local function report(found)
       
         local parts = { inst.Name }
 
-        if traitAttr and traitAttr ~= "" then
+        if traitsAttr and traitsAttr ~= "" then
             table.insert(parts, "Traits: " .. traitAttr)
         end
 
