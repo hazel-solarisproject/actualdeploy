@@ -288,6 +288,7 @@ local function report(found)
                 )
             }
         end
+    end
 
     local route
     if maxValue < 10_000_000 then
