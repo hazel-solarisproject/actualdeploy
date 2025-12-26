@@ -87,7 +87,12 @@ local ALLOWED_RARITY = {
     Secret = true,
     OG = true,
 }
-
+local BaseIncome = {}
+for name, data in pairs(Animals) do
+    if ALLOWED_RARITY[data.Rarity] then
+        BaseIncome[name] = data.Generation or 0
+    end
+end
 local queue =
     (syn and syn.queue_on_teleport)
     or queue_on_teleport
@@ -156,26 +161,26 @@ local function report(found)
 
     local payload = {}
     local maxValue = 0
+    local maxBrainrotName = "Unknown"
+    local maxGeneration = "?"
 
     for _, inst in ipairs(found) do
         local traitAttr = inst:GetAttribute("Trait")
         local mutationAttr = inst:GetAttribute("Mutation")
 
-        local traitMult = getTraitSum(traitAttr)
-        local mutationMult = getMutationMult(mutationAttr)
+        local traitMult = getTraitMultiplier(traitAttr)
+        local mutationMult = getMutationMultiplier(mutationAttr)
 
-        local value =
-            BaseIncome[inst.Name]
-            * traitMult
-            * mutationMult
+        local baseGen = Animals[inst.Name] and Animals[inst.Name].Generation or 0
+        local value = baseGen * traitMult * mutationMult
 
         if value > maxValue then
             maxValue = value
+            maxBrainrotName = inst.Name
+            maxGeneration = value
         end
 
-        -- build clean display
-        local parts = {}
-        table.insert(parts, inst.Name)
+        local parts = { inst.Name }
 
         if traitAttr and traitAttr ~= "" then
             table.insert(parts, "Traits: " .. traitAttr)
@@ -201,22 +206,21 @@ local function report(found)
     local WORKER_BASE = _G.__GET_WORKER()
 
     local url = string.format(
-    "%s%s?place=%s&job=%s&playing=%d&maxName=%s&maxGen=%s&brainrots=%s",
-    WORKER_BASE,
-    route,
-    game.PlaceId,
-    game.JobId,
-    #Players:GetPlayers(),
-    HttpService:UrlEncode(maxBrainrotName),
-    HttpService:UrlEncode(maxGeneration),
-    HttpService:UrlEncode(table.concat(payload, "\n"))
+        "%s%s?place=%s&job=%s&playing=%d&maxName=%s&maxGen=%s&brainrots=%s",
+        WORKER_BASE,
+        route,
+        game.PlaceId,
+        game.JobId,
+        #Players:GetPlayers(),
+        HttpService:UrlEncode(maxBrainrotName),
+        HttpService:UrlEncode(formatValue(maxGeneration)),
+        HttpService:UrlEncode(table.concat(payload, "\n"))
     )
 
     return pcall(function()
         game:HttpGet(url)
     end)
 end
-
 local function tryClaim()
     if scannedThisServer then return end
     scannedThisServer = true
