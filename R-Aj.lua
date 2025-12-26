@@ -184,7 +184,7 @@ local function report(found)
         local parts = { inst.Name }
 
         if traitsAttr and traitsAttr ~= "" then
-            table.insert(parts, "Traits: " .. traitAttr)
+            table.insert(parts, "Traits: " .. traitsAttr)
         end
 
         if mutationAttr and mutationAttr ~= "" then
