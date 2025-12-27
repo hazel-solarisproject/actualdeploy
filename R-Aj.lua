@@ -91,23 +91,38 @@ local function splitCSV(str)
 end
 
 local function getTraitsMultiplier(attr)
-    local mult = 1
-    for _, name in ipairs(splitCSV(attr)) do
-        local data = Traits[name]
-        if data and data.MultiplierModifier then
-            mult += data.MultiplierModifier
+    local sum = 0
+
+    if attr and attr ~= "" then
+        for _, name in ipairs(splitCSV(attr)) do
+            local data = Traits[name]
+            if data and data.MultiplierModifier then
+                sum += data.MultiplierModifier + 1
+            else
+                sum += 1
+            end
         end
     end
-    return mult
+
+    if sum < 1 then sum = 1 end
+    return sum
 end
 
 local function getMutationMultiplier(attr)
-    if not attr then return 1 end
-    local data = Mutations[attr]
-    if not data or not data.Multiplier then
+    if not attr or attr == "" then
         return 1
     end
-    return 1 + data.Multiplier
+
+    local mult = 1
+
+    for _, name in ipairs(splitCSV(attr)) do
+        local data = Mutations[name]
+        if data and data.Modifier then
+            mult = mult * (1 + data.Modifier)
+        end
+    end
+
+    return mult
 end
 
 local function scan()
