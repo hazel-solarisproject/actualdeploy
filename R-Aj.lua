@@ -74,9 +74,19 @@ local queue =
 
 local function formatValue(n)
     if n >= 1_000_000 then
-        return string.format("%dM", math.floor(n / 1_000_000))
+        local m = n / 1_000_000
+        if m % 1 == 0 then
+            return string.format("%dM", m)
+        else
+            return string.format("%.1fM", m)
+        end
     elseif n >= 1_000 then
-        return string.format("%dk", math.floor(n / 1_000))
+        local k = n / 1_000
+        if k % 1 == 0 then
+            return string.format("%dk", k)
+        else
+            return string.format("%.1fk", k)
+        end
     end
     return tostring(n)
 end
