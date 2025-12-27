@@ -145,7 +145,7 @@ local function main()
         return found
     end
 
-llocal function report(found)
+local function report(found)
     if #found == 0 then return false end
 
     local payload = {}
