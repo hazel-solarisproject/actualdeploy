@@ -145,69 +145,86 @@ local function main()
         return found
     end
 
-    local function report(found)
-        if #found == 0 then return false end
+local function report(found)
+    if #found == 0 then return false end
 
-        local payload = {}
-        local maxValue = 0
-        local maxBrainrotName = "Unknown"
-        local maxGeneration = "?"
+    local payload = {}
+    local entries = {}
 
-        for _, inst in ipairs(found) do
-            local traitsAttr = inst:GetAttribute("Traits")
-            local mutationAttr = inst:GetAttribute("Mutation")
+    local maxValue = 0
+    local maxBrainrotName = "Unknown"
+    local maxGeneration = "?"
 
-            local traitsMult = getTraitsMultiplier(traitsAttr)
-            local mutationMult = getMutationMultiplier(mutationAttr)
-            local baseGen = Animals[inst.Name] and Animals[inst.Name].Generation or 0
-            local value = baseGen * traitsMult * mutationMult
+    for _, inst in ipairs(found) do
+        local traitsAttr = inst:GetAttribute("Traits")
+        local mutationAttr = inst:GetAttribute("Mutation")
 
-            if value > maxValue then
-                maxValue = value
-                maxBrainrotName = inst.Name
-                maxGeneration = value
-            end
+        local traitsMult = getTraitsMultiplier(traitsAttr)
+        local mutationMult = getMutationMultiplier(mutationAttr)
+        local baseGen = Animals[inst.Name] and Animals[inst.Name].Generation or 0
+        local value = baseGen * traitsMult * mutationMult
 
-            local parts = { inst.Name }
-            if traitsAttr and traitsAttr ~= "" then
-                table.insert(parts, "Traits: " .. traitsAttr)
-            end
-            if mutationAttr and mutationAttr ~= "" then
-                table.insert(parts, "Mutation: " .. mutationAttr)
-            end
-            table.insert(parts, formatValue(value))
-            table.insert(payload, "`" .. table.concat(parts, " | ") .. "`")
+        table.insert(entries, {
+            inst = inst,
+            value = value,
+            traits = traitsAttr,
+            mutation = mutationAttr,
+        })
+
+        if value > maxValue then
+            maxValue = value
+            maxBrainrotName = inst.Name
+            maxGeneration = value
+        end
+    end
+
+    table.sort(entries, function(a, b)
+        return a.value > b.value
+    end)
+
+    for _, entry in ipairs(entries) do
+        local parts = { entry.inst.Name }
+
+        if entry.traits and entry.traits ~= "" then
+            table.insert(parts, "Traits: " .. entry.traits)
+        end
+        if entry.mutation and entry.mutation ~= "" then
+            table.insert(parts, "Mutation: " .. entry.mutation)
         end
 
-        local route
-        if maxValue < 10_000_000 then
-            route = "/low"
-        elseif maxValue < 30_000_000 then
-            route = "/med"
-        else
-            route = "/high"
-        end
+        table.insert(parts, formatValue(entry.value))
+        table.insert(payload, "`" .. table.concat(parts, " | ") .. "`")
+    end
 
-        local WORKER_BASE = _G.__GET_WORKER()
+    local route
+    if maxValue < 10_000_000 then
+        route = "/low"
+    elseif maxValue < 30_000_000 then
+        route = "/med"
+    else
+        route = "/high"
+    end
 
-        local url = string.format(
-            "%s%s?place=%s&job=%s&playing=%d&maxName=%s&maxGen=%s&brainrots=%s",
-            WORKER_BASE,
-            route,
-            game.PlaceId,
-            game.JobId,
-            #Players:GetPlayers(),
-            HttpService:UrlEncode(maxBrainrotName),
-            HttpService:UrlEncode(formatValue(maxGeneration)),
-            HttpService:UrlEncode(table.concat(payload, "\n"))
-        )
+    local WORKER_BASE = _G.__GET_WORKER()
 
-        local ok, err = pcall(function()
-            return game:HttpGet(url)
-        end)
+    local url = string.format(
+        "%s%s?place=%s&job=%s&playing=%d&maxName=%s&maxGen=%s&brainrots=%s",
+        WORKER_BASE,
+        route,
+        game.PlaceId,
+        game.JobId,
+        #Players:GetPlayers(),
+        HttpService:UrlEncode(maxBrainrotName),
+        HttpService:UrlEncode(formatValue(maxGeneration)),
+        HttpService:UrlEncode(table.concat(payload, "\n"))
+    )
 
-        print("cf send:", ok, err)
-        print("url:", url)
+    local ok, err = pcall(function()
+        return game:HttpGet(url)
+    end)
+
+    print("cf send:", ok, err)
+    print("url:", url)
     end
 
     local function tryClaim()
