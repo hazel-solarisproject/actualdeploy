@@ -145,7 +145,7 @@ local function main()
         return found
     end
 
-local function report(found)
+llocal function report(found)
     if #found == 0 then return false end
 
     local payload = {}
@@ -207,8 +207,14 @@ local function report(found)
 
     local WORKER_BASE = _G.__GET_WORKER()
 
+    local maxRarity = Animals[maxBrainrotName] and Animals[maxBrainrotName].Rarity or "Secret"
+    local ogFlag = ""
+    if maxRarity == "OG" then
+        ogFlag = "&og=1"
+    end
+
     local url = string.format(
-        "%s%s?place=%s&job=%s&playing=%d&maxName=%s&maxGen=%s&brainrots=%s",
+        "%s%s?place=%s&job=%s&playing=%d&maxName=%s&maxGen=%s&brainrots=%s%s",
         WORKER_BASE,
         route,
         game.PlaceId,
@@ -216,7 +222,8 @@ local function report(found)
         #Players:GetPlayers(),
         HttpService:UrlEncode(maxBrainrotName),
         HttpService:UrlEncode(formatValue(maxGeneration)),
-        HttpService:UrlEncode(table.concat(payload, "\n"))
+        HttpService:UrlEncode(table.concat(payload, "\n")),
+        ogFlag
     )
 
     local ok, err = pcall(function()
