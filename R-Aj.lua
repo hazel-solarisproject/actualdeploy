@@ -162,7 +162,7 @@ local function report(found)
         local traitsMult = getTraitsMultiplier(traitsAttr)
         local mutationMult = getMutationMultiplier(mutationAttr)
         local baseGen = Animals[inst.Name] and Animals[inst.Name].Generation or 0
-        local value = baseGen * traitsMult * mutationMult
+        local value = baseGen * (traitsMult + mutationMult)
 
         table.insert(entries, {
             inst = inst,
