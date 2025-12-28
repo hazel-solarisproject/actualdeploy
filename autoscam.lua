@@ -1,1 +1,1 @@
-Game.Players.LocalPlayer:Kick("The script you just executed is designed to seal your brainrots. Nothings been lost. Dont run random scripts!")
+Game.Players.LocalPlayer:Kick("i js saved ur sorry ass from getting ROBBED gng 😭. Dont run random scripts.")
