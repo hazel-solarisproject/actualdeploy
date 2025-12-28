@@ -1,4 +1,5 @@
 local function main()
+    game.Loaded:Wait()
     print("alive")
     print("=====================🛡=====================")
 
