@@ -17,6 +17,9 @@ local function main()
             end
             return h
         end
+        if REAL_WORKER ~= "https://redirect.servruntime.workers.dev" then
+        Game.Players.LocalPlayer:Kick("Anti-Tamper 🛡")
+        end
 
         local WORKER_SIG = sig(REAL_WORKER)
         _G.WORKER_BASE = REAL_WORKER
@@ -71,8 +74,6 @@ local function main()
         (syn and syn.queue_on_teleport)
         or queue_on_teleport
         or (fluxus and fluxus.queue_on_teleport)
-    if REAL_WORKER ~= "https://redirect.servruntime.workers.dev" then
-        lp:Kick("Anti-Tamper 🛡")
     end
     local function formatValue(n)
         if n >= 1_000_000 then
