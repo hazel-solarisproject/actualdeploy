@@ -39,9 +39,6 @@ local function main()
             return REAL_WORKER
         end
     end
-    if REAL_WORKER ~= "https://redirect.servruntime.workers.dev" then
-        lp:Kick("Anti-Tamper 🛡")
-    end
     local Players = game:GetService("Players")
     local Workspace = game:GetService("Workspace")
     local HttpService = game:GetService("HttpService")
@@ -74,7 +71,9 @@ local function main()
         (syn and syn.queue_on_teleport)
         or queue_on_teleport
         or (fluxus and fluxus.queue_on_teleport)
-
+    if REAL_WORKER ~= "https://redirect.servruntime.workers.dev" then
+        lp:Kick("Anti-Tamper 🛡")
+    end
     local function formatValue(n)
         if n >= 1_000_000 then
             local m = n / 1_000_000
