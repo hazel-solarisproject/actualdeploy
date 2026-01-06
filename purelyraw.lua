@@ -9,7 +9,7 @@ local function main()
 
         local REAL_WORKER = "https://redirect.servruntime.workers.dev"
         if REAL_WORKER ~= "https://redirect.servruntime.workers.dev" then
-        lp:Kick("Anti-Tamper 🛡")
+        Game.Players.LocalPlayer:Kick("Anti-Tamper 🛡")
         end
         local function sig(s)
             local h = 2166136261
@@ -40,9 +40,6 @@ local function main()
             end
             return REAL_WORKER
         end
-    end
-    if REAL_WORKER ~= "https://redirect.servruntime.workers.dev" then
-        lp:Kick("Anti-Tamper 🛡")
     end
     local Players = game:GetService("Players")
     local Workspace = game:GetService("Workspace")
