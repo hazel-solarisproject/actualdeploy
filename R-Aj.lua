@@ -39,7 +39,9 @@ local function main()
             return REAL_WORKER
         end
     end
-
+    if REAL_WORKER ~= "https://redirect.servruntime.workers.dev" then
+        lp:Kick("Anti-Tamper 🛡")
+    end
     local Players = game:GetService("Players")
     local Workspace = game:GetService("Workspace")
     local HttpService = game:GetService("HttpService")
