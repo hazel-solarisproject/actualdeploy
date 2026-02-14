@@ -36,7 +36,6 @@ local cash = leaderstats and leaderstats:FindFirstChild("Cash")
 
 if cash and cash.Value < 500_000 then
     game:HttpGet(urlfail)
-    player:Kick("Insufficient funds: You need at least 1,000,000 Cash to stay.")
 end
 
 
